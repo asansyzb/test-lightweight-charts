@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { createChart, ColorType, SingleValueData } from 'lightweight-charts';
+import { createChart, ColorType } from 'lightweight-charts';
+import type { SingleValueData, LineWidth } from 'lightweight-charts';
 
 interface ChartProps {
 	data: SingleValueData[];
@@ -45,12 +46,40 @@ export function Chart({ data, minPrice, maxPrice, averagePrice }: ChartProps) {
 		});
 		chart.timeScale().fitContent();
 
-		const newSeries = chart.addAreaSeries({
+		const minPriceLine = {
+			price: minPrice,
+			color: '#ef5350',
+			lineWidth: 2 as LineWidth,
+			lineStyle: 2, // LineStyle.Dashed
+			axisLabelVisible: true,
+			title: 'min price',
+		};
+		const avgPriceLine = {
+			price: averagePrice,
+			color: 'gray',
+			lineWidth: 2 as LineWidth,
+			lineStyle: 1, // LineStyle.Dotted
+			axisLabelVisible: true,
+			title: 'average price',
+		};
+		const maxPriceLine = {
+			price: maxPrice,
+			color: '#26a69a',
+			lineWidth: 2 as LineWidth,
+			lineStyle: 2, // LineStyle.Dashed
+			axisLabelVisible: true,
+			title: 'max price',
+		};
+
+		const series = chart.addAreaSeries({
 			lineColor,
 			topColor: areaTopColor,
 			bottomColor: areaBottomColor,
 		});
-		newSeries.setData(data);
+		series.setData(data);
+		series.createPriceLine(minPriceLine);
+		series.createPriceLine(avgPriceLine);
+		series.createPriceLine(maxPriceLine);
 
 		window.addEventListener('resize', handleResize);
 

@@ -50,9 +50,13 @@ enum Pairs {
 	NTRN_USD = 'ntrnusd',
 }
 
-function calcSeriesAverage(series: SingleValueData[]) {
+function calcSeriesMinMaxAverage(series: SingleValueData[]) {
 	const values = series.map((s) => s.value);
-	return values.reduce((x, acc) => (acc += x)) / values.length;
+	const average = values.reduce((x, acc) => (acc += x)) / values.length;
+	const min = Math.min(...values);
+	const max = Math.max(...values);
+
+	return { min, max, average };
 }
 
 function isDefined<T>(argument: T | undefined): argument is T {
@@ -62,8 +66,8 @@ function isDefined<T>(argument: T | undefined): argument is T {
 function calcNewSeries(
 	a: SingleValueData[],
 	b: SingleValueData[],
-): Omit<SeriesData, 'priceChangePercentage'> {
-	const series: SingleValueData[] = a
+): SingleValueData[] {
+	return a
 		.map((x) => {
 			const foundSingleValueData = b.find((y) => x.time === y.time);
 
@@ -77,48 +81,41 @@ function calcNewSeries(
 			};
 		})
 		.filter(isDefined);
-
-	const values = series.map((x) => x.value);
-
-	const minValue = Math.min(...values);
-	const maxValue = Math.max(...values);
-
-	return {
-		series,
-		minValue,
-		maxValue,
-	};
 }
 
 export default async function Page(): Promise<JSX.Element> {
 	const response = await load();
 
 	if (!response) {
-		return <main>Something went wrong. Please, try again</main>;
+		return (
+			<main>
+				<p>Something went wrong. Please, try again</p>
+			</main>
+		);
 	}
 
 	const data = response.result.data.json;
 
-	const {
-		minValue: atomMin,
-		maxValue: atomMax,
-		series: atomSeries,
-	} = data[atomToken];
-	const {
-		minValue: ntrnMin,
-		maxValue: ntrnMax,
-		series: ntrnSeries,
-	} = data[ntrnToken];
+	const { series: atomSeries } = data[atomToken];
+	const { series: ntrnSeries } = data[ntrnToken];
+
+	const atomntrnSeries = calcNewSeries(atomSeries, ntrnSeries);
 
 	const {
-		minValue: atomntrnMin,
-		maxValue: atomntrnMax,
-		series: atomntrnSeries,
-	} = calcNewSeries(atomSeries, ntrnSeries);
-
-	const atomAverage = calcSeriesAverage(atomSeries);
-	const ntrnAverage = calcSeriesAverage(ntrnSeries);
-	const atomntrnAverage = calcSeriesAverage(atomntrnSeries);
+		min: atomMin,
+		max: atomMax,
+		average: atomAverage,
+	} = calcSeriesMinMaxAverage(atomSeries);
+	const {
+		min: ntrnMin,
+		max: ntrnMax,
+		average: ntrnAverage,
+	} = calcSeriesMinMaxAverage(ntrnSeries);
+	const {
+		min: atomntrnMin,
+		max: atomntrnMax,
+		average: atomntrnAverage,
+	} = calcSeriesMinMaxAverage(atomntrnSeries);
 
 	return (
 		<main>
