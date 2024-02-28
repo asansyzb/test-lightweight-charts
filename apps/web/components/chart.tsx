@@ -43,6 +43,10 @@ export function Chart({ data, minPrice, maxPrice, averagePrice }: ChartProps) {
 			},
 			width: ref.current.clientWidth,
 			height: ref.current.clientHeight,
+			timeScale: {
+				fixLeftEdge: true,
+				fixRightEdge: true,
+			},
 		});
 		chart.timeScale().fitContent();
 
@@ -108,8 +112,12 @@ export function Chart({ data, minPrice, maxPrice, averagePrice }: ChartProps) {
 			<p className="absolute left-3 top-14 z-10">
 				Minimum Price: ${minPrice.toFixed(2)}
 			</p>
-			<p className="absolute -rotate-90 -right-4 translate-x-4 top-1/2 -translate-y-1/2 z-10">Price</p>
-			<p className="absolute -bottom-4 translate-y-4 left-1/2 -translate-x-1/2 z-10">Date</p>
+			<p className="absolute -rotate-90 -right-4 translate-x-4 top-1/2 -translate-y-1/2 z-10">
+				Price
+			</p>
+			<p className="absolute -bottom-4 translate-y-4 left-1/2 -translate-x-1/2 z-10">
+				Date
+			</p>
 		</div>
 	);
 }
